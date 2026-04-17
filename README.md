@@ -1,3 +1,11 @@
+Notes from Sheylle (4/17/2026):
+
+- Okay, I have completed most of  (hope you don't mind, I had time, and wanted to stay ahead) , but I have not touched the explanation questions
+- When you have time you can go through ipynb, double check everything.
+- I will start getting our report ready :)
+- Let me know if that works for you. 
+
+
 Recommendations
 
 - Do not add your code as an appendix. Please submit your code as a separate .ipynb or .py file.
