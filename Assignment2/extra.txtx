@@ -1,0 +1,90 @@
+## Extra code (to better understand)
+
+colors = {'A': 'green', 'B': 'orange', 'C': 'red'}
+markers = {'A': 'o', 'B': 's', 'C': '^'}
+labels = {'A': 'Series A (Clean)', 'B': 'Series B (Moderate Noise)', 'C': 'Series C (High Noise)'}
+
+
+results_original = {'A': {'area': {'means': [], 'stds': []}, 
+                          'perim': {'means': [], 'stds': []}},
+                    'B': {'area': {'means': [], 'stds': []}, 
+                          'perim': {'means': [], 'stds': []}},
+                    'C': {'area': {'means': [], 'stds': []}, 
+                          'perim': {'means': [], 'stds': []}}}
+
+
+for series in ['A', 'B', 'C']:
+    series_lower = series.lower()
+    
+    for i in range(1, 5):
+        img = dip.ImageReadTIFF(f'rect{i}{series_lower}.tif')
+        img = 255-img
+        mean_a, std_a, mean_p, std_p = measure_image(img)
+        
+        results_original[series]['area']['means'].append(mean_a)
+        results_original[series]['area']['stds'].append(std_a)
+        results_original[series]['perim']['means'].append(mean_p)
+        results_original[series]['perim']['stds'].append(std_p)
+
+
+fig, axes = plt.subplots(1, 2, figsize=(16, 7))
+
+# Left plot: AREA
+ax = axes[0]
+for series in ['A', 'B', 'C']:
+    sqrt_means = []
+    cv_values = []
+    
+    for i in range(4):
+        mean_val = results_original[series]['area']['means'][i]
+        std_val = results_original[series]['area']['stds'][i]
+        sqrt_means.append(np.sqrt(mean_val))
+        cv_values.append(std_val / mean_val if mean_val > 0 else 0)
+    
+    ax.plot(sqrt_means, cv_values, color=colors[series], marker=markers[series], 
+            linewidth=2, markersize=10, label=labels[series], linestyle='-')
+    
+    for i in range(4):
+        ax.annotate(f'rect{i+1}{series.lower()}', 
+                   (sqrt_means[i], cv_values[i]),
+                   xytext=(5, 5), textcoords='offset points', 
+                   fontsize=8, color=colors[series])
+
+ax.set_xlabel('√(Mean Area)', fontsize=12)
+ax.set_ylabel('CV = σ/μ', fontsize=12)
+ax.set_title('AREA Discretization Error', fontsize=12, fontweight='bold')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper right', fontsize=10)
+
+# Right plot: PERIMETER
+ax = axes[1]
+for series in ['A', 'B', 'C']:
+    sqrt_means = []
+    cv_values = []
+    
+    for i in range(4):
+        mean_val = results_original[series]['perim']['means'][i]
+        std_val = results_original[series]['perim']['stds'][i]
+        sqrt_means.append(np.sqrt(mean_val))
+        cv_values.append(std_val / mean_val if mean_val > 0 else 0)
+    
+    ax.plot(sqrt_means, cv_values, color=colors[series], marker=markers[series], 
+            linewidth=2, markersize=10, label=labels[series], linestyle='-')
+    
+    for i in range(4):
+        ax.annotate(f'rect{i+1}{series.lower()}', 
+                   (sqrt_means[i], cv_values[i]),
+                   xytext=(5, 5), textcoords='offset points', 
+                   fontsize=8, color=colors[series])
+
+ax.set_xlabel('√(Mean Perimeter)', fontsize=12)
+ax.set_ylabel('CV = σ/μ', fontsize=12)
+ax.set_title('PERIMETER Discretization Error', fontsize=12, fontweight='bold')
+ax.grid(True, alpha=0.3)
+ax.legend(loc='upper right', fontsize=10)
+
+plt.suptitle('Comparison of Discretization Error: Clean vs Noisy Images', 
+             fontsize=14, fontweight='bold', y=1.02)
+plt.tight_layout()
+plt.show()
+
